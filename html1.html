@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>INKWATCH - AI Movie Recommendation</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet"> <!-- Homepage -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet"> <!-- Movie Section -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"> <!-- Default/Recommendation -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: 'Poppins', sans-serif;
+    }
+    .section {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1;
+    }
+    .content {
+      position: relative;
+      z-index: 2;
+      max-width: 90%;
+      margin: auto;
+    }
+    .homepage-content {
+      font-family: 'Lobster', cursive;
+    }
+    .homepage-content h1 {
+      font-size: 4rem;
+      margin-bottom: 1.2rem;
+    }
+    .homepage-content h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .movie-content {
+      font-family: 'Bebas Neue', cursive;
+    }
+    .movie-content h1 {
+      font-size: 4rem;
+      margin-bottom: 1.2rem;
+    }
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1.2rem;
+    }
+    label {
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+      display: block;
+      text-align: left;
+    }
+    select, input {
+      padding: 14px;
+      margin: 12px 0 25px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2rem;
+    }
+    button {
+      background: #e50914;
+      border: none;
+      padding: 16px 26px;
+      margin: 12px;
+      color: #fff;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+    .nav-controls {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .hidden {
+      display: none;
+    }
+    #recommendation-section {
+      background: #fff;
+      color: #e50914;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-shadow: none;
+    }
+    #recommendation-section .content {
+      color: #e50914;
+    }
+    .poster img {
+      width: 150px;
+      height: 220px;
+      border: 4px solid #e50914;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+    .text-recommended {
+      font-size: 2em;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    .loader-recommended {
+      width: 64px;
+      height: 64px;
+      border: 8px solid #ccc;
+      border-top: 8px solid #1d72b8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Homepage -->
+  <div id="step-1" class="section" style="background-image: url('front.jpg');">
+    <div class="overlay"></div>
+    <div class="content homepage-content">
+      <h1>Welcome to FlickNoir</h1>
+      <h2>What do you wanna watch today?</h2>
+      <button onclick="selectChoice('movies')">Let's go</button>
+    </div>
+  </div>
+
+  <!-- Movie Preferences -->
+  <div id="movies-questions" class="section hidden" style="background-image: url('movie1.jpg');">
+    <div class="overlay"></div>
+    <div class="content movie-content">
+      <h1>Movie Preferences</h1>
+      <form id="movieForm">
+        <label for="movie-genre">Select your favorite genre:</label>
+        <select id="movie-genre">
+          <option value="action">Action</option>
+          <option value="comedy">Comedy</option>
+          <option value="drama">Drama</option>
+          <option value="thriller">Thriller</option>
+          <option value="animation">Animation</option>
+          <option value="sci-fi">Sci-Fi</option>
+          <option value="documentary">Documentary</option>
+          <option value="horror">Horror</option>
+          <option value="romance">Romance</option>
+          <option value="fantasy">Fantasy</option>
+          <option value="crime">Crime</option>
+          <option value="mystery">Mystery</option>
+        </select>
+        <label for="movie-tone">Select the tone you prefer:</label>
+        <select id="movie-tone">
+          <option value="light">Light & Fun</option>
+          <option value="serious">Serious</option>
+        </select>
+        <div class="nav-controls">
+          <button type="button" onclick="goToStep(1)">Back</button>
+          <button type="button" onclick="showRecommendation()">Next</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Recommendation -->
+  <div id="recommendation-section" class="section hidden">
+    <div class="text-recommended">Thinking...</div>
+    <div class="loader-recommended"></div>  
+  </div>
+
+  <script>
+    let choice = '';
+    let currentStep = 1;
+
+    function updateSections() {
+      document.getElementById('step-1').classList.add('hidden');
+      document.getElementById('movies-questions').classList.add('hidden');
+      document.getElementById('recommendation-section').classList.add('hidden');
+      
+      if (currentStep === 1) {
+        document.getElementById('step-1').classList.remove('hidden');
+      } else if (currentStep === 2) {
+        document.getElementById('movies-questions').classList.remove('hidden');
+      } else if (currentStep === 3) {
+        showRecommendation();
+        document.getElementById('recommendation-section').classList.remove('hidden');
+      }
+    }
+
+    function selectChoice(selected) {
+      choice = selected;
+      currentStep = 2;
+      updateSections();
+    }
+
+    function goToStep(step) {
+      currentStep = step;
+      updateSections();
+    }
+
+    const API_KEY = 'AIzaSyDmhCXY_bW9QinbkCrnVtP21eTOvYMFZiA';
+
+    async function showRecommendation() {
+      const genre = document.getElementById('movie-genre').value;
+      const tone = document.getElementById('movie-tone').value;
+      const prompt = `Recommend me a highly rated movie of ${genre} genre and with a ${tone} Tone and reply to me in snake case as in lilo_and_stitch, Do not write anything else in the response, also recommend a different movie every time.`;
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+      const body = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        const result = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No answer found.";
+        console.log(result);
+        const final_url = `https://www.rottentomatoes.com/m/${result}`;
+        window.open(final_url, '_blank');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function restart() {
+      choice = '';
+      currentStep = 1;
+      updateSections();
+    }
+
+    updateSections();
+  </script>
+</body>
+</html>
